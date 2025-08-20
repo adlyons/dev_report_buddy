@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Beta Report Buddy V0.8</title>
+  <title>Report Buddy V0.5</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
@@ -35,11 +35,11 @@
 
     #damageInput input{background:transparent;color:#fff;font-size:1.25rem;border:1px solid #fff;border-radius:5px;outline:none;padding:.3rem .5rem;text-align:center;width:200px}
 
-    #zoomControls{position:absolute;bottom:30vh;right:.4rem;display:flex;flex-direction:row;gap:.4rem;z-index:25}
+    #zoomIn{position:absolute;bottom:calc(3.5rem + 20vh + 10px);right:.2rem;width:35px;height:35px;border:2px solid #fff;border-radius:6px;background:rgba(0,0,0,.6);color:#fff;font-size:1.2rem;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:25}
 
-    #zoomControls button{width:35px;height:35px;border:2px solid #fff;border-radius:6px;background:rgba(0,0,0,.6);color:#fff;font-size:1.2rem;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+    #zoomOut{position:absolute;bottom:calc(3.5rem + 20vh + 10px);right:calc(.2rem + 30vw - 35px);width:35px;height:35px;border:2px solid #fff;border-radius:6px;background:rgba(0,0,0,.6);color:#fff;font-size:1.2rem;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:25}
 
-    #zoomControls button:active{background:rgba(255,255,255,.3)}
+    #zoomIn:active, #zoomOut:active{background:rgba(255,255,255,.3)}
 
     #captureBtn{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:50px;height:50px;border:4px solid #fff;border-radius:50%;background:rgba(255,255,255,.2);z-index:25;cursor:pointer}
 
@@ -65,7 +65,7 @@
       left: -100%;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
+      background: #000;
       color: #fff;
       z-index: 100;
       display: flex;
@@ -83,23 +83,44 @@
       height: 100%;
       display: flex;
       flex-direction: column;
+      max-width: 100vw;
+      max-height: 100vh;
     }
 
     #locationMap {
-      height: 42%;
+      height: 40%;
       width: 100%;
       background: #222;
+      flex-shrink: 0;
     }
 
     #locationContent {
       flex: 1;
-      padding: 0.5rem;
-      overflow-y: visible;
+      padding: 1.5rem 1rem;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
       text-align: center;
+      max-height: 60%;
+    }
+
+    #modeSwitchBtn {
+      position: fixed;
+      bottom: 65px;
+      left: 20px;
+      padding: 0.5rem 1rem;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 25;
+    }
+    #modeSwitchBtn:active {
+      background: rgba(255, 255, 255, 0.3);
     }
 
     #howToReportBtn {
@@ -118,6 +139,130 @@
     }
     #howToReportBtn:active {
       background: rgba(255, 255, 255, 0.3);
+    }
+
+    #recordBtn {
+      position: absolute;
+      bottom: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 50px;
+      border: 4px solid #fff;
+      border-radius: 50%;
+      background: #fff;
+      z-index: 25;
+      cursor: pointer;
+      display: none;
+      transition: all 0.2s ease;
+    }
+    #recordBtn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      background: #ff0000;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+    #recordBtn:hover {
+      transform: translateX(-50%) scale(1.05);
+    }
+    #recordBtn.recording {
+      animation: recordPulse 1.5s infinite;
+    }
+    #recordBtn.recording::before {
+      width: 25px;
+      height: 25px;
+      border-radius: 3px;
+      background: #ff0000;
+    }
+    #recordBtn:active {
+      transform: translateX(-50%) scale(0.95);
+    }
+
+    @keyframes recordPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7),
+                    0 0 20px rgba(255, 0, 0, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 0 20px rgba(255, 0, 0, 0),
+                    0 0 30px rgba(255, 0, 0, 0.7);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0),
+                    0 0 20px rgba(255, 0, 0, 0.5);
+      }
+    }
+
+    #recordTimer {
+      position: absolute;
+      bottom: 16%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      display: none;
+      z-index: 25;
+      border: 2px solid #fff;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    @keyframes timerGlow {
+      0%, 100% {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      }
+      50% {
+        box-shadow: 0 4px 20px rgba(255, 0, 0, 0.6);
+      }
+    }
+
+    @keyframes blink {
+      0%, 50% {
+        opacity: 1;
+      }
+      51%, 100% {
+        opacity: 0.3;
+      }
+    }
+
+    #videoPreview {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+    }
+    #videoPreview video {
+      max-width: 100%;
+      max-height: 80%;
+      border: 4px solid #fff;
+      border-radius: 8px;
+    }
+    #videoPreview .button-container {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    #videoPreview button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
     }
 
     #howToReportPanel {
@@ -192,30 +337,51 @@
       cursor: pointer;
     }
 
+    #notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 0, 0, 0.9);
+      color: #fff;
+      padding: 1.5rem 2rem;
+      border-radius: 15px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      z-index: 200;
+      display: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
   </style>
 </head>
 <body>
   <div id="app">
     <div id="videoContainer"><video id="video" autoplay playsinline muted></video><div id="loader">Loading camera…</div></div>
     <div id="map"></div>
-    <div id="zoomControls">
-      <button id="zoomOut">−</button>
-      <button id="zoomIn">+</button>
-    </div>
+    <button id="zoomIn">+</button>
+    <button id="zoomOut">−</button>
     <div id="geoInfo">Locating…</div>
-    <div id="reportbuddy">Beta Report Buddy v0.8</div>
+    <div id="reportbuddy">Report Buddy v0.5</div>
 
     <div id="eventSelector">
       <label for="eventType"></label>
       <select id="eventType">
         <option value="">Select Report Type</option>
-        <option value="Tornado 🌪️">Tornado 🌪️</option>
-        <option value="Funnel Cloud 🌪️">Funnel Cloud 🌪️</option>
-        <option value="Wall Cloud ⛈️">Wall Cloud ⛈️</option>
-        <option value="Hail 🧊">Hail 🧊</option>
-        <option value="Damage ⚠️">Damage ⚠️</option>
-        <option value="Flooding 🌊">Flooding 🌊</option>
-        <option value="Wild Fire 🔥">Wild Fire 🔥</option>
+        <option value="Tornado">Tornado</option>
+        <option value="Funnel Cloud">Funnel Cloud</option>
+        <option value="Wall Cloud">Wall Cloud</option>
+        <option value="Hail">Hail</option>
+        <option value="Damage">Damage</option>
+        <option value="Flooding">Flooding</option>
+        <option value="Wild Fire">Wild Fire</option>
       </select>
     </div>
 
@@ -250,13 +416,26 @@
     </div>
 
     <button id="captureBtn" title="Capture Screen"></button>
+    <button id="recordBtn" title="Record Video"></button>
+    <div id="recordTimer">00:00</div>
+    <button id="modeSwitchBtn">📹 Switch to Record</button>
     <button id="howToReportBtn">How to Report</button>
+
+    <div id="notification">Please select a report type first!</div>
 
     <div id="snapshot">
       <img id="snapshotImg" alt="Captured"/>
       <div class="button-container">
         <button id="downloadSnap">Download</button>
         <button id="closeSnap">Close</button>
+      </div>
+    </div>
+
+    <div id="videoPreview">
+      <video id="recordedVideo" controls></video>
+      <div class="button-container">
+        <button id="downloadVideo">Download</button>
+        <button id="closeVideo">Close</button>
       </div>
     </div>
 
@@ -276,16 +455,28 @@
   <div id="locationMapContainer">
     <div id="locationMap"></div>
     <div id="locationContent">
-      <h3>Current Location Details</h3>
-      <p>Lat: <span id="locLat">--</span></p>
-      <p>Lon: <span id="locLon">--</span></p>
-      <p>City: <span id="locCity">--</span></p>
-      <p>State: <span id="locState">--</span></p>
-      <p>County: <span id="locCounty">--</span></p>
-      <p>WFO: <span id="locWFO">--</span></p>
-      <p>WFO X Handle: <span id="locWFOHandle">--</span></p>
-      <p>WFO Phone (Use with Caution): <span id="locWFOPhone">--</span></p>
-      <button onclick="closeLocationPanel()">Close</button>
+      <h2 style="color: #4ecdc4; margin-bottom: 1.5rem;">Current Location Details</h2>
+      
+      <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; width: 90%; max-width: 400px;">
+        <h3 style="color: #ff6b6b; margin-bottom: 0.8rem; font-size: 1.1rem;">📍 Coordinates</h3>
+        <p style="margin: 0.5rem 0;"><strong>Latitude:</strong> <span id="locLat" style="color: #4ecdc4;">--</span></p>
+        <p style="margin: 0.5rem 0;"><strong>Longitude:</strong> <span id="locLon" style="color: #4ecdc4;">--</span></p>
+      </div>
+      
+      <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; width: 90%; max-width: 400px;">
+        <h3 style="color: #ff6b6b; margin-bottom: 0.8rem; font-size: 1.1rem;">🏙️ Location</h3>
+        <p style="margin: 0.5rem 0;"><strong>City:</strong> <span id="locCity" style="color: #4ecdc4;">--</span></p>
+        <p style="margin: 0.5rem 0;"><strong>State:</strong> <span id="locState" style="color: #4ecdc4;">--</span></p>
+        <p style="margin: 0.5rem 0;"><strong>County:</strong> <span id="locCounty" style="color: #4ecdc4;">--</span></p>
+      </div>
+      
+      <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; width: 90%; max-width: 400px;">
+        <h3 style="color: #ff6b6b; margin-bottom: 0.8rem; font-size: 1.1rem;">🌤️ Weather Office</h3>
+        <p style="margin: 0.5rem 0;"><strong>WFO:</strong> <span id="locWFO" style="color: #4ecdc4;">--</span></p>
+        <p style="margin: 0.5rem 0;"><strong>X/Twitter:</strong> <span id="locWFOHandle" style="color: #4ecdc4; font-weight: bold;">--</span></p>
+        <p style="margin: 0.5rem 0;"><strong>Phone:</strong> <span id="locWFOPhone" style="color: #ffd93d;">--</span></p>
+        <p style="font-size: 0.8rem; color: #ff6b6b; margin-top: 0.5rem;">⚠️ Use phone with caution during severe weather</p>
+      </div>
     </div>
   </div>
 </div>
@@ -298,33 +489,26 @@
       <strong>⚠️ SAFETY FIRST:</strong> Never put yourself in danger to get a photo or report. Your safety is more important than any report.
     </div>
 
+    <h3>📝 How To Submit A Report</h3>
+    <ol>
+      <li><strong>Select report type</strong> from dropdown menu at top
+        <ul style="list-style-type: none; margin-top: 0.3rem; margin-left: -0.5rem;">
+          <li>• <strong>For hail:</strong> Select size or describe if larger than 5"</li>
+          <li>• <strong>For damage:</strong> Briefly describe what you see</li>
+        </ul>
+      </li>
+      <li><strong>Take photo</strong> using the capture button</li>
+      <li><strong>Download photo</strong> to attach to your tweet</li>
+      <li><strong>Swipe left</strong> to open tweet panel</li>
+      <li><strong>Copy tweet</strong> and post to X (Twitter)</li>
+    </ol>
+
     <h3>📸 Taking Good Photos</h3>
     <ul>
       <li><strong>Landscape orientation</strong> - Hold your phone horizontally for wider view</li>
       <li><strong>Include reference objects</strong> - Trees, buildings, or poles help show scale</li>
       <li><strong>Clear view</strong> - Avoid shooting through windshield if possible (pull over safely)</li>
     </ul>
-
-    <div class="tip">
-      <strong>💡 Hail Measurement Tips:</strong><br>
-      • Use a ruler or coin for size comparison in photo<br>
-      • Measure the largest stones you find<br>
-      • Report time hail started and stopped
-    </div>
-
-    <h3>📝 Submitting Your Report</h3>
-    <ol>
-      <li><strong>Select report type</strong> from dropdown menu at top
-        <ul style="list-style-type: none; margin-top: 0.3rem; margin-left: 0;">
-          <li style="margin-left: 0.2rem;">• <strong>For hail:</strong> Select size or describe if larger than 5"</li>
-          <li style="margin-left: 0.2rem;">• <strong>For damage:</strong> Briefly describe what you see</li>
-        </ul>
-      </li>
-      <li><strong>Take photo</strong> using the capture button</li>
-      <li><strong>Swipe left</strong> to open tweet panel</li>
-      <li><strong>Copy tweet</strong> and post to X (Twitter)</li>
-      <li><strong>Download photo</strong> to attach to your tweet</li>
-    </ol>
 
     <h3>📍 Location Accuracy</h3>
     <ul>
@@ -344,6 +528,13 @@
       <li><strong>Flooding</strong> - Water over roadways, swift water rescues needed</li>
     </ul>
 
+    <div class="tip">
+      <strong>💡 Hail Measurement Tips:</strong><br>
+      • Use a ruler or coin for size comparison in photo<br>
+      • Measure the largest stones you find<br>
+      • Report time hail started and stopped
+    </div>
+
     <h3>🚫 What NOT to Report</h3>
     <ul>
       <li>Regular rain or non-severe thunderstorms</li>
@@ -361,7 +552,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
 
-    const Version_ID ='V0.8';
+    const Version_ID ='V0.5';
 
     let touchStartX = null;
     let isPanelOpen = false;
@@ -452,24 +643,69 @@
       setZoom(newZoom);
     }
 
+    function showNotification(message) {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.style.display = 'block';
+      
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    }
+
     async function capturePhoto(){
       const captureButton = document.getElementById('captureBtn');
       const eventSelector = document.getElementById('eventSelector');
       const howToReportBtn = document.getElementById('howToReportBtn');
       const eventType = document.getElementById('eventType');
+      const customHailInput = document.getElementById('customHailInput');
+      const damageInput = document.getElementById('damageInput');
+      const notification = document.getElementById('notification');
+      
+      // Check if report type is selected
+      if (!eventType.value) {
+        showNotification('Please select a report type first!');
+        return;
+      }
+      
+      // Check if hail size is selected when report type is Hail
+      if (eventType.value === 'Hail' && !document.getElementById('hailSize').value) {
+        showNotification('Please select hail size first!');
+        return;
+      }
+      
+      // Check if damage description is entered when report type is Damage
+      if (eventType.value === 'Damage' && !document.getElementById('damageDescription').value) {
+        showNotification('Please describe the damage first!');
+        return;
+      }
+      
+      // Make absolutely sure notification is hidden before capture
+      notification.style.display = 'none';
       
       // Hide elements before capture
       captureButton.style.opacity = '0';
       howToReportBtn.style.display = 'none';
+      document.getElementById('modeSwitchBtn').style.display = 'none';
+      document.getElementById('zoomIn').style.display = 'none';
+      document.getElementById('zoomOut').style.display = 'none';
+      
+      // Store original display states
+      const originalDisplay = eventSelector.style.display;
+      const originalHailDisplay = customHailInput.style.display;
+      const originalDamageDisplay = damageInput.style.display;
       
       // Hide "Select Report Type" option if it's selected
-      const originalDisplay = eventSelector.style.display;
       if (eventType.value === '') {
         eventSelector.style.display = 'none';
       } else {
         // Also hide the selector even if a type is selected
-        eventSelector.style.display = originalDisplay;
+        eventSelector.style.display = 'none';
       }
+      
+      // Hide custom input fields
+      customHailInput.style.display = 'none';
+      damageInput.style.display = 'none';
       
       const overlay=document.getElementById('snapshot'),img=document.getElementById('snapshotImg');
       const canvas=await html2canvas(document.getElementById('app'),{useCORS:true, scale: window.devicePixelRatio || 3});
@@ -485,6 +721,11 @@
       captureButton.style.opacity = '1';
       eventSelector.style.display = originalDisplay;
       howToReportBtn.style.display = 'block';
+      document.getElementById('modeSwitchBtn').style.display = 'block';
+      document.getElementById('zoomIn').style.display = 'flex';
+      document.getElementById('zoomOut').style.display = 'flex';
+      customHailInput.style.display = originalHailDisplay;
+      damageInput.style.display = originalDamageDisplay;
     }
 
     async function fetchCountyName(url){
@@ -509,7 +750,9 @@
         const countyUrl=d.properties.county;
         const county=countyUrl?await fetchCountyName(countyUrl):'Unknown';
         const wfo=d.properties.cwa||'WFO';
-        tweetInfo={...tweetInfo,city,state,county,wfo:`${wfo}`,lat:lat.toFixed(3),lon:lon.toFixed(3),timestamp:new Date().toLocaleString('en-US', {hour: '2-digit', minute: '2-digit', month: 'numeric', day: 'numeric', year: 'numeric'}),heading};
+        const now = new Date();
+        const formattedTimestamp = `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')}/${now.getFullYear()} @ ${now.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true})}`;
+        tweetInfo={...tweetInfo,city,state,county,wfo:`${wfo}`,lat:lat.toFixed(3),lon:lon.toFixed(3),timestamp:formattedTimestamp,heading};
         info.textContent=`${tweetInfo.timestamp} | Lat: ${tweetInfo.lat}, Lon: ${tweetInfo.lon} | Near: ${city}, ${state} | ${county} County | WFO: ${wfo}`;
 
         document.getElementById('locLat').textContent = lat.toFixed(3);
@@ -585,72 +828,54 @@
     function getWFOHANDLE(WFO){
       console.log('getting wfo X handle');
       const wfo_handles= {
-//some of these are not correct. Need to fix checked with grok 8/10/2025
-      
+
         "ABQ": "NWSAlbuquerque",
         "ABR": "NWSAberdeen",
         "AFC": "NWSAnchorage",
-        "AFG": "NWSFairbanks",
-        "AJK": "NWSJuneau",
-        "AKQ": "NWSWakefieldVA",
-        "ALY": "NWSAlbany",
         "AMA": "NWSAmarillo",
         "APX": "NWSGaylord",
         "ARX": "NWSLaCrosse",
         "BGM": "NWSBinghamton",
         "BIS": "NWSBismarck",
-        "BMX": "NWSBirmingham",
         "BOI": "NWSBoise",
-        "BOU": "NWSBoulder",
         "BOX": "NWSBoston",
-        "BRO": "NWSBrownsville",
         "BTV": "NWSBurlington",
         "BUF": "NWSBuffalo",
         "BYZ": "NWSBillings",
         "CAE": "NWSColumbia",
         "CAR": "NWSCaribou",
         "CHS": "NWSCharlestonSC",
-        "CLE": "NWSCLE",
+        "CLE": "NWSCleveland",
         "CRP": "NWSCorpus",
         "CTP": "NWSStateCollege",
-        "CYS": "NWSCheyenne",
         "DDC": "NWSDodgeCity",
         "DLH": "NWSDuluth",
         "DMX": "NWSDesMoines",
         "DTX": "NWSDetroit",
-        "DVN": "NWSQuadCities",
+        "DVN": "NWSDavenport",
         "EAX": "NWSKansasCity",
-        "EKA": "NWSEureka",
         "EPZ": "NWSElPaso",
         "EWX": "NWSSanAntonio",
-        "FFC": "NWSAtlanta",
         "FGF": "NWSGrandForks",
         "FGZ": "NWSFlagstaff",
-        "FSD": "NWSSiouxFalls",
+        "FSD": "NWSFSiouxFalls",
         "FWD": "NWSFortWorth",
-        "GGW": "NWSGlasgow",
         "GID": "NWSHastings",
-        "GJT": "NWSGrandJunction",
         "GLD": "NWSGoodland",
         "GRB": "NWSGreenBay",
         "GRR": "NWSGrandRapids",
         "GSP": "NWSGSP",
         "GUM": "NWSGuam",
-        "GYX": "NWSGray",
-        "HFO": "NWSHonolulu",
         "HGX": "NWSHouston",
         "HNX": "NWSHanford",
         "HUN": "NWSHuntsville",
         "ICT": "NWSWichita",
         "ILM": "NWSWilmingtonNC",
         "ILN": "NWSILN",
-        "ILX": "NWSLincolnIL",
         "IND": "NWSIndianapolis",
-        "IWX": "NWSIWX",
         "JAN": "NWSJacksonMS",
         "JAX": "NWSJacksonville",
         "JKL": "NWSJacksonKY",
-        "KEY": "NWSKeyWest",
         "LBF": "NWSNorthPlatte",
         "LCH": "NWSLakeCharles",
         "LIX": "NWSNewOrleans",
@@ -658,14 +883,12 @@
         "LMK": "NWSLouisville",
         "LOT": "NWSChicago",
         "LOX": "NWSLosAngeles",
-        "LSX": "NWSStLouis",
         "LUB": "NWSLubbock",
         "LWX": "NWS_BaltWash",
         "LZK": "NWSLittleRock",
         "MAF": "NWSMidland",
         "MEG": "NWSMemphis",
         "MFL": "NWSMiami",
-        "MFR": "NWSMedford",
         "MHX": "NWSMoreheadCity",
         "MKX": "NWSMilwaukee",
         "MLB": "NWSMelbourne",
@@ -674,11 +897,7 @@
         "MQT": "NWSMarquette",
         "MRX": "NWSMorristown",
         "MSO": "NWSMissoula",
-        "MTR": "NWSBayArea",
-        "OAX": "NWSOmaha",
-        "OHX": "NWSNashville",
-        "OKX": "NWSNewYorkNY",
-        "OTX": "NWSSpokane",
+        "MTR": "NWSSanFrancisco",
         "OUN": "NWSNorman",
         "PAH": "NWSPaducah",
         "PBZ": "NWSPittsburgh",
@@ -693,11 +912,9 @@
         "RIW": "NWSRiverton",
         "RLX": "NWSCharlestonWV",
         "RNK": "NWSBlacksburg",
-        "SEW": "NWSSeattle",
-        "SGF": "NWSSpringfield",
+        "SGF": "NWSpringfield",
         "SGX": "NWSSanDiego",
         "SHV": "NWSShreveport",
-        "SJT": "NWSSanAngelo",
         "SJU": "NWSSanJuan",
         "SLC": "NWSSaltLakeCity",
         "STO": "NWSSacramento",
@@ -706,10 +923,15 @@
         "TFX": "NWSGreatFalls",
         "TOP": "NWSTopeka",
         "TSA": "NWSTulsa",
-        "TWC": "NWSTucson",
-        "UNR": "NWSRapidCity",
         "VEF": "NWSVegas",
-        "PPG": "NWSPagoPago"
+        "WFO": "NWS",        // Fallback
+        "AKQ": "NWSWakefieldVA",
+        "GYX": "NWSGray",
+        "OKX": "NWSNewYorkNY",
+        "SEW": "NWSSeattle",
+        "SJT": "NWSSanAngelo",
+        "OTX": "NWSSpokane",
+        "GJT": "NWSGrandJunction"
       }
 
 
@@ -741,7 +963,7 @@
       const headingText=tweetInfo.heading!=null?` looking ${headingToCompass(tweetInfo.heading)}`:'';
 
       handle = getWFOHANDLE(tweetInfo.wfo);
-      t.value=`@${handle} ${tweetInfo.event}${sizePart}${damagePart} reported near ${tweetInfo.city}, ${tweetInfo.state} ${tweetInfo.county} County (Lat ${tweetInfo.lat}, Lon ${tweetInfo.lon}) at ${tweetInfo.timestamp}.${headingText} #${tweetInfo.state}wx // generated by Report Buddy: ${Version_ID}`;
+      t.value=`${tweetInfo.event}${sizePart}${damagePart} reported near ${tweetInfo.city}, ${tweetInfo.state} (Lat ${tweetInfo.lat}, Lon ${tweetInfo.lon}) - ${tweetInfo.timestamp}. #${tweetInfo.state}wx @${handle} // Generated by Report Buddy.`;
       updateCharCounter();
       document.getElementById('tweetPanel').classList.add('open');
       isPanelOpen = true;
@@ -865,7 +1087,7 @@
 
 
       // Init or update map view
-      initLocationMap(tweetInfo.lat, tweetInfo.lon);
+      initLocationMap(parseFloat(tweetInfo.lat), parseFloat(tweetInfo.lon));
     }
 
 
@@ -922,9 +1144,16 @@
     let locationMap;
     let countyLayer=null;
 
+    let locationMarker = null;
+    
     function initLocationMap(lat = 38.0, lon = -97.0) {
       if (locationMap) {
         locationMap.setView([lat, lon], 9);
+        if (locationMarker) {
+          locationMarker.setLatLng([lat, lon]);
+        } else {
+          locationMarker = L.marker([lat, lon]).addTo(locationMap);
+        }
         return;
       }
 
@@ -934,7 +1163,7 @@
         minZoom: 4
       }).addTo(locationMap);
       locationMap.setView([lat, lon], 8);
-      L.marker([lat, lon]).addTo(locationMap);
+      locationMarker = L.marker([lat, lon]).addTo(locationMap);
 
       fetch("https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json")
         .then(response => {
@@ -993,6 +1222,230 @@
       }
     }
 
+    // Video Recording Variables
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recordingTimer = null;
+    let recordingStartTime = null;
+    let isRecordMode = false;
+    const MAX_RECORDING_TIME = 30000; // 30 seconds in milliseconds
+
+    function switchMode() {
+      const modeSwitchBtn = document.getElementById('modeSwitchBtn');
+      const captureBtn = document.getElementById('captureBtn');
+      const recordBtn = document.getElementById('recordBtn');
+      
+      isRecordMode = !isRecordMode;
+      
+      if (isRecordMode) {
+        modeSwitchBtn.textContent = '📷 Switch to Photo';
+        modeSwitchBtn.classList.add('record-mode');
+        captureBtn.style.display = 'none';
+        recordBtn.style.display = 'block';
+      } else {
+        modeSwitchBtn.textContent = '📹 Switch to Record';
+        modeSwitchBtn.classList.remove('record-mode');
+        captureBtn.style.display = 'block';
+        recordBtn.style.display = 'none';
+        // Stop recording if switching modes
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          stopRecording();
+        }
+      }
+    }
+
+    function updateRecordingTimer() {
+      if (!recordingStartTime) return;
+      
+      const elapsed = Date.now() - recordingStartTime;
+      const seconds = Math.floor(elapsed / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const displaySeconds = seconds % 60;
+      
+      document.getElementById('recordTimer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
+      
+      // Auto-stop at 30 seconds
+      if (elapsed >= MAX_RECORDING_TIME) {
+        stopRecording();
+      }
+    }
+
+    async function startRecording() {
+      const eventType = document.getElementById('eventType');
+      const notification = document.getElementById('notification');
+      const eventSelector = document.getElementById('eventSelector');
+      const customHailInput = document.getElementById('customHailInput');
+      const damageInput = document.getElementById('damageInput');
+      const howToReportBtn = document.getElementById('howToReportBtn');
+      const modeSwitchBtn = document.getElementById('modeSwitchBtn');
+      
+      // Check if report type is selected
+      if (!eventType.value) {
+        showNotification('Please select a report type first!');
+        return;
+      }
+      
+      // Check if hail size is selected when report type is Hail
+      if (eventType.value === 'Hail' && !document.getElementById('hailSize').value) {
+        showNotification('Please select hail size first!');
+        return;
+      }
+      
+      // Check if damage description is entered when report type is Damage
+      if (eventType.value === 'Damage' && !document.getElementById('damageDescription').value) {
+        showNotification('Please describe the damage first!');
+        return;
+      }
+      
+      // Hide notification and UI elements before recording
+      notification.style.display = 'none';
+      
+      // Store original display states
+      const originalEventDisplay = eventSelector.style.display;
+      const originalHailDisplay = customHailInput.style.display;
+      const originalDamageDisplay = damageInput.style.display;
+      
+      // Hide UI elements for clean recording
+      if (eventType.value === '') {
+        eventSelector.style.display = 'none';
+      } else {
+        eventSelector.style.display = 'none';
+      }
+      customHailInput.style.display = 'none';
+      damageInput.style.display = 'none';
+      howToReportBtn.style.display = 'none';
+      modeSwitchBtn.style.display = 'none';
+      document.getElementById('recordBtn').style.opacity = '0.3';
+      
+      try {
+        // Try to get display media (screen recording) first
+        let stream;
+        try {
+          // Request display media (will capture the full screen including map and details)
+          stream = await navigator.mediaDevices.getDisplayMedia({
+            video: {
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+              frameRate: { ideal: 30 }
+            },
+            audio: false
+          });
+        } catch (displayError) {
+          // Fallback to camera if display media is not available
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: {
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 1920 },
+              height: { ideal: 1080 }
+            },
+            audio: true 
+          });
+        }
+        
+        recordedChunks = [];
+        mediaRecorder = new MediaRecorder(stream, {
+          mimeType: 'video/webm;codecs=vp9,opus'
+        });
+        
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        };
+        
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          
+          // Show video preview
+          const videoPreview = document.getElementById('videoPreview');
+          const recordedVideo = document.getElementById('recordedVideo');
+          recordedVideo.src = url;
+          videoPreview.style.display = 'flex';
+          
+          // Store blob for download
+          recordedVideo.dataset.blob = url;
+          
+          // Stop all tracks
+          stream.getTracks().forEach(track => track.stop());
+          
+          // Restore UI elements
+          eventSelector.style.display = originalEventDisplay;
+          customHailInput.style.display = originalHailDisplay;
+          damageInput.style.display = originalDamageDisplay;
+          howToReportBtn.style.display = 'block';
+          modeSwitchBtn.style.display = 'block';
+          document.getElementById('recordBtn').style.opacity = '1';
+        };
+        
+        mediaRecorder.start();
+        recordingStartTime = Date.now();
+        
+        // Update UI
+        document.getElementById('recordBtn').classList.add('recording');
+        document.getElementById('recordTimer').style.display = 'block';
+        
+        // Start timer
+        recordingTimer = setInterval(updateRecordingTimer, 100);
+        
+      } catch (error) {
+        // Restore UI elements on error
+        eventSelector.style.display = originalEventDisplay;
+        customHailInput.style.display = originalHailDisplay;
+        damageInput.style.display = originalDamageDisplay;
+        howToReportBtn.style.display = 'block';
+        modeSwitchBtn.style.display = 'block';
+        document.getElementById('recordBtn').style.opacity = '1';
+        
+        alert('Failed to start recording: ' + error.message);
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        
+        // Clear timer
+        if (recordingTimer) {
+          clearInterval(recordingTimer);
+          recordingTimer = null;
+        }
+        
+        // Reset UI
+        document.getElementById('recordBtn').classList.remove('recording');
+        document.getElementById('recordTimer').style.display = 'none';
+        document.getElementById('recordTimer').textContent = '00:00';
+        recordingStartTime = null;
+      }
+    }
+
+    function toggleRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    function downloadVideo() {
+      const recordedVideo = document.getElementById('recordedVideo');
+      const url = recordedVideo.dataset.blob;
+      
+      if (url) {
+        const link = document.createElement('a');
+        const now = new Date();
+        const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(now.getUTCDate()).padStart(2, '0');
+        const year = now.getUTCFullYear();
+        const hours = String(now.getUTCHours()).padStart(2, '0');
+        const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+        link.download = `report-buddy-video-${month}_${day}_${year}_${hours}${minutes}z.webm`;
+        link.href = url;
+        link.click();
+      }
+    }
+
     window.addEventListener('load',()=>{
       startCamera();
       initMap();
@@ -1003,6 +1456,20 @@
       document.getElementById('zoomIn').addEventListener('click',zoomIn);
       document.getElementById('zoomOut').addEventListener('click',zoomOut);
       document.getElementById('howToReportBtn').addEventListener('click',openHowToReport);
+      
+      // Video recording event listeners
+      document.getElementById('modeSwitchBtn').addEventListener('click', switchMode);
+      document.getElementById('recordBtn').addEventListener('click', toggleRecording);
+      document.getElementById('closeVideo').addEventListener('click', () => {
+        document.getElementById('videoPreview').style.display = 'none';
+        // Clean up the blob URL
+        const recordedVideo = document.getElementById('recordedVideo');
+        if (recordedVideo.dataset.blob) {
+          URL.revokeObjectURL(recordedVideo.dataset.blob);
+          recordedVideo.dataset.blob = '';
+        }
+      });
+      document.getElementById('downloadVideo').addEventListener('click', downloadVideo);
     });
   </script>
 </body>
